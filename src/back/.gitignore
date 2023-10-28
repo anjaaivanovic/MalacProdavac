@@ -181,6 +181,7 @@ DocProject/Help/html
 
 # Click-Once directory
 publish/
+database.db
 
 # Publish Web Output
 *.[Pp]ublish.xml
@@ -476,6 +477,7 @@ $RECYCLE.BIN/
 # Windows shortcuts
 *.lnk
 
-database.db
-database.db-shm
-database.db-wal
+# Database
+*.db
+*.db-shm
+*.db-wal
