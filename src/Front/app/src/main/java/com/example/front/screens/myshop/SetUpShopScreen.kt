@@ -372,8 +372,10 @@ fun ProfilePhoto(context:Context, userId:Int, viewModel: MyShopViewModel, navCon
             {
                 val newShop = NewShopDTO(ownerId = userId, name= name, address = address, accountNumber = accountNumber, categories = clickedCards, pib = pib.toInt(), workingHours = workingHoursList)
                 viewModel.newShop(newShop, picture)
-                navController.navigate("${Screen.MyShop.route}")
-                Log.d("NEW SHOP", newShop.toString())
+                if(viewModel.stateNewShop.value.newShop != null)
+                {
+                    navController.navigate("${Screen.MyShop.route}/${viewModel.stateNewShop.value.newShop!!.success}/${1}")
+                }
             }
             else{
                 coroutineScope.launch {

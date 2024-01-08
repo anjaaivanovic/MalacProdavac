@@ -32,6 +32,8 @@ import com.example.front.R
 import com.example.front.helper.DataStore.DataStoreManager
 import com.example.front.navigation.Screen
 import com.example.front.navigation.SetupNavGraph
+import com.google.firebase.messaging.FirebaseMessaging
+import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 
@@ -101,8 +103,21 @@ fun Sidebar(
                         text = "Logout",
                         modifier = Modifier
                             .clickable {
-                                //ukloni token
-                                //vodi na Login
+                                FirebaseMessaging.getInstance().deleteToken()
+                                    .addOnCompleteListener { task ->
+                                        if (task.isSuccessful) {
+
+                                            FirebaseMessaging.getInstance().token
+                                                .addOnCompleteListener { newTokenTask ->
+                                                    if (newTokenTask.isSuccessful) {
+                                                        val newToken = newTokenTask.result
+                                                        GlobalScope.launch {
+                                                            dataStoreManager.storeFCM(newToken)
+                                                        }
+                                                    }
+                                                }
+                                        }
+                                    }
                                 runBlocking {
                                     dataStoreManager.storeToken("")
                                 }

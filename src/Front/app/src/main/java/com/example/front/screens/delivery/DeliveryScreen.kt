@@ -102,6 +102,21 @@ fun DeliveryScreen(navHostController: NavHostController, deliveryViewModel: Deli
             LazyColumn() {
 
                 item {
+                    Tabs(
+                        onShopsSelected = { selectedColumnIndex=true },
+                        onFavoritesSelected = { selectedColumnIndex=false },
+                        selectedColumnIndex = selectedColumnIndex,
+                        firstTab = "Routes",
+                        secondTab = "Requests",
+                        isFilters = false
+                    )
+                }
+            }
+
+            if(selectedColumnIndex)
+            {
+                Column(modifier = Modifier
+                    .fillMaxSize()) {
                     val startDate = remember { mutableStateOf(LocalDate.now()) }
                     val endDate = remember { mutableStateOf(LocalDate.now()) }
                     val isOpenStart = remember { mutableStateOf(false) }
@@ -109,7 +124,6 @@ fun DeliveryScreen(navHostController: NavHostController, deliveryViewModel: Deli
                     Row {
                         Column(
                             modifier = Modifier
-                                .fillMaxSize()
                                 .padding(top = 16.dp, start = 16.dp, end = 16.dp),
                             horizontalAlignment = Alignment.CenterHorizontally
                         ) {
@@ -169,7 +183,8 @@ fun DeliveryScreen(navHostController: NavHostController, deliveryViewModel: Deli
                                 label = { Text("Start address (street, city):") },
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .padding(bottom = 8.dp)
+                                    .padding(bottom = 8.dp),
+                                shape = RoundedCornerShape(20.dp)
                             )
 
                             // Drugo polje za unos teksta
@@ -182,7 +197,8 @@ fun DeliveryScreen(navHostController: NavHostController, deliveryViewModel: Deli
                                 label = { Text("End address (street, city):") },
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .padding(bottom = 16.dp)
+                                    .padding(bottom = 16.dp),
+                                shape = RoundedCornerShape(20.dp)
                             )
 
                             // Dugme "Add Route"
@@ -203,33 +219,24 @@ fun DeliveryScreen(navHostController: NavHostController, deliveryViewModel: Deli
                             }
                         }
                     }
-                }
-            }
-
-            Tabs(
-                onShopsSelected = { selectedColumnIndex=true },
-                onFavoritesSelected = { selectedColumnIndex=false },
-                selectedColumnIndex = selectedColumnIndex,
-                firstTab = "Routes",
-                secondTab = "Requests",
-                isFilters = false
-            )
-            if(selectedColumnIndex)
-            {
-                if(trips == null)
-                {
-                    Column(modifier = Modifier
-                        .fillMaxSize()
-                        .padding(top = 170.dp), horizontalAlignment = Alignment.CenterHorizontally) {
-                        Image(painter = painterResource(id = R.drawable.nofound), contentDescription = null, modifier = Modifier.size(200.dp))
-                        Text("No routes found", style = MaterialTheme.typography.titleSmall)
+                    Spacer(modifier = Modifier.height(16.dp))
+                    Text(text="My routes", style=MaterialTheme.typography.titleMedium, modifier=Modifier.padding(start=16.dp))
+                    Spacer(modifier = Modifier.height(13.dp))
+                    if(trips == null)
+                    {
+                        Column(modifier = Modifier
+                            .fillMaxSize()
+                            .padding(top = 170.dp), horizontalAlignment = Alignment.CenterHorizontally) {
+                            Image(painter = painterResource(id = R.drawable.nofound), contentDescription = null, modifier = Modifier.size(200.dp))
+                            Text("No routes found", style = MaterialTheme.typography.titleSmall)
+                        }
                     }
-                }
-                else{
-                    trips?.let {
-                        LazyColumn {
-                            items(it) { trip ->
-                                DeliveryRouteCard(trip, navHostController)
+                    else{
+                        trips?.let {
+                            LazyColumn {
+                                items(it) { trip ->
+                                    DeliveryRouteCard(trip, navHostController)
+                                }
                             }
                         }
                     }
@@ -309,7 +316,7 @@ fun YourDataCard(yourData: ReqForDeliveryPersonDTO, deliveryViewModel:DeliveryVi
 fun AcceptDialog(onDismiss: () -> Unit, viewModel: DeliveryViewModel, userId: Int, reqId:Int) {
     val overlayColor = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.4f)
     var value by remember { mutableStateOf(0) }
-var selectedId by remember { mutableStateOf(0) }
+    var selectedId by remember { mutableStateOf(0) }
     Dialog(
         properties = DialogProperties(usePlatformDefaultWidth = false),
         onDismissRequest = { onDismiss() }) {
@@ -402,7 +409,7 @@ fun DeliveryRouteCard(trip: Trip, navHostController: NavHostController) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(8.dp)
+            .padding(16.dp)
             .clickable {
                 navHostController.navigate("${Screen.Route.route}/${trip.id}")
             },

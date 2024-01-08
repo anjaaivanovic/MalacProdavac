@@ -25,6 +25,7 @@ import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -46,6 +47,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import androidx.lifecycle.viewModelScope
+import androidx.navigation.NavHostController
 import com.example.front.R
 import com.example.front.components.CommentsTextBox
 import com.example.front.components.MyDropdownCategories
@@ -58,6 +60,7 @@ import com.example.front.model.DTO.NewProductDTO
 import com.example.front.model.DTO.Size
 import com.example.front.model.product.ProductInfo
 import com.example.front.model.product.Stock
+import com.example.front.navigation.Screen
 import com.example.front.screens.myshop.getMultipartBodyPart
 import com.example.front.screens.shop.createSizeList
 import com.example.front.ui.theme.Typography
@@ -66,7 +69,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
 @Composable
-fun EditProduct(onDismiss: () -> Unit, shopViewModel: OneShopViewModel, productInfo: ProductInfo) {
+fun EditProduct(onDismiss: () -> Unit, shopViewModel: OneShopViewModel, productInfo: ProductInfo, navHostController: NavHostController) {
     var currentStep by remember { mutableStateOf(0) }
 
     val overlayColor = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.4f)
@@ -104,7 +107,7 @@ fun EditProduct(onDismiss: () -> Unit, shopViewModel: OneShopViewModel, productI
                     }
 
                     1 -> {
-                        contentOfAddNewImageOnEdit(shopViewModel, onNextClicked = { currentStep = 0 }, productInfo.productId)
+                        contentOfAddNewImageOnEdit(shopViewModel, onNextClicked = { currentStep = 0 }, productInfo.productId, navHostController)
                     }
                 }
             }
@@ -382,7 +385,8 @@ fun convertStockListToSizeList(stockList: List<Stock>): List<Size> {
 fun contentOfAddNewImageOnEdit(
     shopViewModel: OneShopViewModel,
     onNextClicked: () -> Unit,
-    productId: Int?){
+    productId: Int?,
+    navHostController: NavHostController){
     val context = LocalContext.current
     val photoPicker = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetMultipleContents()
@@ -392,7 +396,6 @@ fun contentOfAddNewImageOnEdit(
         }
     }
 
-
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -401,7 +404,7 @@ fun contentOfAddNewImageOnEdit(
     ) {
         Text(
             "Add images for product",
-            style = MaterialTheme.typography.titleMedium.copy(color = MaterialTheme.colorScheme.onBackground),
+            style = MaterialTheme.typography.bodyMedium,
             modifier = Modifier.padding(bottom = 24.dp)
         )
 
@@ -412,9 +415,8 @@ fun contentOfAddNewImageOnEdit(
                 .size(150.dp)
                 .padding(10.dp)
                 .clip(RoundedCornerShape(8.dp))
-                .border(1.dp, MaterialTheme.colorScheme.primary, RoundedCornerShape(8.dp))
                 .clickable { photoPicker.launch("image/*") },
-            contentScale = ContentScale.Fit,
+            contentScale = ContentScale.Crop,
             alignment = Alignment.Center
         )
 
@@ -422,18 +424,31 @@ fun contentOfAddNewImageOnEdit(
 
         Button(
             onClick = { shopViewModel.uploadAllImagesEdit(productId!!) },
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier.fillMaxWidth(),
+            shape = RoundedCornerShape(8.dp),
+            colors = ButtonDefaults.buttonColors(MaterialTheme.colorScheme.secondary)
         ) {
-            Text("Upload Images")
+            Text("Upload Images", color = MaterialTheme.colorScheme.onSecondary)
         }
 
         Spacer(modifier = Modifier.height(8.dp))
 
         OutlinedButton(
             onClick = onNextClicked,
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier.fillMaxWidth(),
+            shape = RoundedCornerShape(8.dp)
         ) {
             Text("Go Back")
+        }
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        OutlinedButton(
+            onClick = { navHostController.navigate("${Screen.Product.route}/$productId") },
+            modifier = Modifier.fillMaxWidth(),
+            shape = RoundedCornerShape(8.dp)
+        ) {
+            Text("Finish")
         }
     }
 }

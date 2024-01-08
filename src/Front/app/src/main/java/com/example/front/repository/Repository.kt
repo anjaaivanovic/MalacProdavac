@@ -34,6 +34,7 @@ import com.example.front.model.DTO.ShopDTO
 import com.example.front.model.DTO.ShopDetailsCheckoutDTO
 import com.example.front.model.DTO.ShopDetailsDTO
 import com.example.front.model.DTO.ShopPagesDTO
+import com.example.front.model.DTO.SubscribeDTO
 import com.example.front.model.DTO.ToggleLikeDTO
 import com.example.front.model.DTO.Trip
 import com.example.front.model.DTO.UserRateDTO
@@ -49,6 +50,7 @@ import com.example.front.model.user.MyProfileDTO
 import com.example.front.model.user.UserEditDTO
 import okhttp3.MultipartBody
 import retrofit2.Response
+import retrofit2.http.Query
 import javax.inject.Inject
 
 class Repository @Inject constructor(private val api: Api) {
@@ -262,8 +264,8 @@ class Repository @Inject constructor(private val api: Api) {
     suspend fun deleteShop(shopId: Int): Response<SuccessBoolean> {
         return api.deleteShop(shopId)
     }
-    suspend fun checkProductsAvailability(products: List<CheckAvailabilityReqDTO>):Response<List<CheckAvailabilityResDTO>>
-    {
+
+    suspend fun checkProductsAvailability(products: List<CheckAvailabilityReqDTO>): Response<List<CheckAvailabilityResDTO>> {
         return api.checkProductsAvailability(products)
     }
 
@@ -271,11 +273,15 @@ class Repository @Inject constructor(private val api: Api) {
         return api.GetRoutesForDeliveryPerson(userId)
     }
 
-    suspend fun newShop(data: NewShopDTO):Response<SuccessInt> {
+    suspend fun newShop(data: NewShopDTO): Response<SuccessInt> {
         return api.newShop(data)
     }
 
-    suspend fun uploadImage2(type: Int, id: Int, imagePart: MultipartBody.Part): Response<SuccessBoolean> {
+    suspend fun uploadImage2(
+        type: Int,
+        id: Int,
+        imagePart: MultipartBody.Part
+    ): Response<SuccessBoolean> {
         return api.uploadImage2(type, id, imagePart)
     }
 
@@ -283,70 +289,74 @@ class Repository @Inject constructor(private val api: Api) {
         return api.insertOrders(orders)
     }
 
-    suspend fun editShop(EditShop: EditShopDTO):Response<SuccessBoolean>
-    {
+    suspend fun editShop(EditShop: EditShopDTO): Response<SuccessBoolean> {
         return api.editShop(EditShop)
     }
-    suspend fun getNotifications(userId: Int, type: List<Int>?,page: Int): Response<List<NotificationDTO>> {
+
+    suspend fun getNotifications(
+        userId: Int,
+        type: List<Int>?,
+        page: Int
+    ): Response<List<NotificationDTO>> {
         return api.getNotifications(userId, type, page)
     }
-    suspend fun userRate(userRate: UserRateDTO):Response<SuccessBoolean>
-    {
+
+    suspend fun userRate(userRate: UserRateDTO): Response<SuccessBoolean> {
         return api.userRate(userRate)
     }
-    suspend fun productReview(productReview: LeaveReviewDTO):Response<SuccessBoolean>
-    {
+
+    suspend fun productReview(productReview: LeaveReviewDTO): Response<SuccessBoolean> {
         return api.productReview(productReview)
     }
 
-    suspend fun submitReview(productID: Int, userID: Int, rating: Int, comment: String): Response<SuccessBoolean> {
-        val x = AddProductReviewDTO(id=productID, userId = userID, rating=rating, comment = comment)
+    suspend fun submitReview(
+        productID: Int,
+        userID: Int,
+        rating: Int,
+        comment: String
+    ): Response<SuccessBoolean> {
+        val x =
+            AddProductReviewDTO(id = productID, userId = userID, rating = rating, comment = comment)
         return api.submitReview(x)
     }
-    suspend fun deleteNotification(notificationId: Int):Response<SuccessBoolean>
-    {
+
+    suspend fun deleteNotification(notificationId: Int): Response<SuccessBoolean> {
         return api.deleteNotification(notificationId)
     }
 
     suspend fun getNotificationPageCount(userId: Int, type: List<Int>?): Response<PageCountDTO> {
         return api.getNotificationPageCount(userId, type)
     }
-    suspend fun getRequestsForShopDTO(shopId: Int):Response<List<RequestsForShopDTO>>
-    {
+
+    suspend fun getRequestsForShopDTO(shopId: Int): Response<List<RequestsForShopDTO>> {
         return api.getRequestsForShopDTO(shopId)
     }
 
-    suspend fun getDeliveriesPersonForRequest(requestId: Int):Response<List<DeliveryPersonDTO>>
-    {
+    suspend fun getDeliveriesPersonForRequest(requestId: Int): Response<List<DeliveryPersonDTO>> {
         return api.getDeliveriesPersonForRequest(requestId)
     }
-    suspend fun chooseDeliveryPerson(requestId: Int,deliveryPersonId: Int):Response<Boolean>
-    {
-        return api.chooseDeliveryPerson(requestId,deliveryPersonId)
+
+    suspend fun chooseDeliveryPerson(requestId: Int, deliveryPersonId: Int): Response<Boolean> {
+        return api.chooseDeliveryPerson(requestId, deliveryPersonId)
     }
 
-    suspend fun toggleLikeProduct(productId: Int, userId: Int):Response<ToggleLikeDTO>
-    {
-        return api.toggleLikeProduct(productId,userId)
+    suspend fun toggleLikeProduct(productId: Int, userId: Int): Response<ToggleLikeDTO> {
+        return api.toggleLikeProduct(productId, userId)
     }
 
-    suspend fun editProduct(product: NewProductDTO):Response<Boolean>
-    {
+    suspend fun editProduct(product: NewProductDTO): Response<Boolean> {
         return api.editProduct(product)
     }
 
-    suspend fun getShopOrders(ownerId: Int, status:Int?, page:Int):Response<List<OrdersDTO>>
-    {
-        return api.getShopOrders(ownerId,status,page)
+    suspend fun getShopOrders(ownerId: Int, status: Int?, page: Int): Response<List<OrdersDTO>> {
+        return api.getShopOrders(ownerId, status, page)
     }
 
-    suspend fun getReqForDelivery(deliveryPersonId: Int): Response<List<ReqForDeliveryPersonDTO>>
-    {
+    suspend fun getReqForDelivery(deliveryPersonId: Int): Response<List<ReqForDeliveryPersonDTO>> {
         return api.getReqForDelivery(deliveryPersonId)
     }
 
-    suspend fun declineRequest(reqId:Int): Response<SuccessBoolean>
-    {
+    suspend fun declineRequest(reqId: Int): Response<SuccessBoolean> {
         return api.declineReq(reqId)
     }
 
@@ -354,10 +364,22 @@ class Repository @Inject constructor(private val api: Api) {
     {
         return api.acceptReq(reqId, routeId)
     }
-    suspend fun markNotificationAsRead(notificationId: Int): ApiResponse{
+    suspend fun markNotificationAsRead(notificationId: Int): ApiResponse {
         return api.notificationMarkAsRead(notificationId)
     }
     suspend fun addNewRoute(newRoute: NewRoute): ApiResponse{
         return api.newRoute(newRoute)
+    }
+
+    suspend fun respondToPickupRequest(
+        orderId: Int,
+        resp: Int,
+        message: String
+    ): Response<Boolean> {
+        return api.respondToPickupRequest(orderId, resp, message)
+    }
+
+    suspend fun subscribeNotification(subscribeDTO: SubscribeDTO): Response<Boolean> {
+        return api.subscribeNotification(subscribeDTO)
     }
 }

@@ -38,11 +38,15 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.OutlinedButton
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.KeyboardArrowDown
+import androidx.compose.material.icons.filled.KeyboardArrowLeft
+import androidx.compose.material.icons.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.Button
@@ -261,7 +265,7 @@ fun ShopScreen(
                     }
                 }
                 item {
-                    ProfilePic(shopViewModel, id, shopId)
+                    ProfilePic(shopViewModel, id, shopId, navController)
                 }
                 item {
                     ShopInfo(shopViewModel, shopId, id, navController, info)
@@ -370,7 +374,6 @@ fun ShopInfo(
 
                 Info(isImageClicked, shopViewModel, shopId, userID, LocalContext.current)
                 Products(isImageClicked, shopViewModel, shopId, navController)
-
             }
         }
     }
@@ -498,13 +501,13 @@ fun Products(
         SortDialog(onDismiss = { showSortDialog = false }, shopViewModel, shopId)
     }
     if (showAddProduct) {
-        AddProductDialog(onDismiss = { showAddProduct = false }, shopViewModel, shopId)
+        AddProductDialog(onDismiss = { showAddProduct = false }, shopViewModel, shopId, navController)
     }
 }
 
 
 @Composable
-fun AddProductDialog(onDismiss: () -> Unit, shopViewModel: OneShopViewModel, shopId: Int?) {
+fun AddProductDialog(onDismiss: () -> Unit, shopViewModel: OneShopViewModel, shopId: Int?, navController: NavHostController) {
     var currentStep by remember { mutableStateOf(0) }
 
     val overlayColor = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.4f)
@@ -542,7 +545,7 @@ fun AddProductDialog(onDismiss: () -> Unit, shopViewModel: OneShopViewModel, sho
                     }
 
                     1 -> {
-                        contentOfAddNewImage(shopViewModel, onNextClicked = { currentStep = 0 })
+                        contentOfAddNewImage(shopViewModel, navController,shopId!!, onNextClicked = { currentStep = 0 }, )
                     }
                 }
             }
@@ -552,7 +555,7 @@ fun AddProductDialog(onDismiss: () -> Unit, shopViewModel: OneShopViewModel, sho
 
 
 @Composable
-fun contentOfAddNewImage(shopViewModel: OneShopViewModel, onNextClicked: () -> Unit) {
+fun contentOfAddNewImage(shopViewModel: OneShopViewModel, navController: NavHostController,shopId: Int, onNextClicked: () -> Unit) {
     val context = LocalContext.current
     val photoPicker = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetMultipleContents()
@@ -606,8 +609,19 @@ fun contentOfAddNewImage(shopViewModel: OneShopViewModel, onNextClicked: () -> U
         ) {
             Text("Go Back")
         }
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        OutlinedButton(
+            onClick = { navController.navigate("${Screen.MyShop.route}/$shopId") },
+            modifier = Modifier.fillMaxWidth(),
+            shape = RoundedCornerShape(8.dp)
+        ) {
+            Text("Finish")
+        }
     }
 }
+
 
 
 
@@ -683,7 +697,7 @@ fun contentOfAddNewProduct(shopViewModel: OneShopViewModel, shopId: Int, onNextC
                             .padding(start = 16.dp, end = 16.dp)
                     ) {
                         MyTextFieldWithoutIcon(
-                            labelValue = "Unity price",
+                            labelValue = "Unit price",
                             value = price.toString(),
                             onValueChange = {
                                 price = it.toFloat()
@@ -725,7 +739,7 @@ fun contentOfAddNewProduct(shopViewModel: OneShopViewModel, shopId: Int, onNextC
                             labelValue = "Quantity",
                             value = quantity,
                             onValueChange = { newQuantity -> quantity = newQuantity },
-                            enabled = selectedMetric.id == 1,
+                            enabled = true,
                             modifier = Modifier.fillMaxWidth()
                         )
 
@@ -744,7 +758,7 @@ fun contentOfAddNewProduct(shopViewModel: OneShopViewModel, shopId: Int, onNextC
                                 }
                             },
                             modifier = Modifier.fillMaxWidth(),
-                            enabled = selectedMetric.id == 1
+                            enabled = true
                         ) {
                             Text("Add Size", style = MaterialTheme.typography.bodyMedium,color = Color.White)
                         }
@@ -754,7 +768,7 @@ fun contentOfAddNewProduct(shopViewModel: OneShopViewModel, shopId: Int, onNextC
                                 modifier = Modifier.padding(5.dp)
                             ) {
                                 Text(
-                                    "Size: ${size.sizeId}, Quantity: ${size.quantity}",
+                                    "Size: ${sizeOptions.firstOrNull { it.first == size.sizeId }?.second}, Quantity: ${size.quantity}",
                                     style = Typography.bodyLarge,
                                     modifier = Modifier
                                         .weight(1f)
@@ -763,13 +777,32 @@ fun contentOfAddNewProduct(shopViewModel: OneShopViewModel, shopId: Int, onNextC
 
                                 IconButton(
                                     onClick = {
+                                        if (size.quantity > 0) {
+                                            sizes = sizes.toMutableList().also {
+                                                it[index] = it[index].copy(quantity = it[index].quantity - 1)
+                                            }
+                                        }
+                                    }
+                                ) {
+                                    Icon(Icons.AutoMirrored.Filled.KeyboardArrowLeft, contentDescription = "Decrease Quantity")
+                                }
+
+                                IconButton(
+                                    onClick = {
+                                        sizes = sizes.toMutableList().also {
+                                            it[index] = it[index].copy(quantity = it[index].quantity + 1)
+                                        }
+                                    }
+                                ) {
+                                    Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, contentDescription = "Increase Quantity")
+                                }
+
+                                IconButton(
+                                    onClick = {
                                         sizes = sizes.toMutableList().apply { removeAt(index) }
                                     }
                                 ) {
-                                    Icon(
-                                        Icons.Filled.Delete,
-                                        contentDescription = "Delete"
-                                    )
+                                    Icon(Icons.Filled.Delete, contentDescription = "Delete")
                                 }
                             }
                         }
@@ -781,7 +814,7 @@ fun contentOfAddNewProduct(shopViewModel: OneShopViewModel, shopId: Int, onNextC
                             .padding(start = 16.dp, end = 16.dp)
                     ) {
                         MyTextFieldWithoutIcon(
-                            labelValue = "Weight of single piece",
+                            labelValue = "Weight of single piece (kg)",
                             value = weight.toString(),
                             onValueChange = {
                                 weight = it.toFloat()
@@ -861,10 +894,7 @@ fun contentOfAddNewProduct(shopViewModel: OneShopViewModel, shopId: Int, onNextC
                                 else -> null
                             }
 
-
-
                             if (errorMess != null) {
-                                // Showing toast for the first error encountered
                                 coroutineScope.launch {
                                     try {
                                         toastHostState.showToast(errorMess, Icons.Default.Clear)
@@ -1294,7 +1324,7 @@ fun Info(
 }
 
 @Composable
-fun ProfilePic(shopViewModel: OneShopViewModel, id: Int, shopId: Int) {
+fun ProfilePic(shopViewModel: OneShopViewModel, id: Int, shopId: Int, navController: NavHostController) {
     val state = shopViewModel.state.value
     var showDialog by remember {
         mutableStateOf(false)
@@ -1347,15 +1377,19 @@ fun ProfilePic(shopViewModel: OneShopViewModel, id: Int, shopId: Int) {
                     },
             )
         } else {
-            Image(
+            val chatId = "0"
+            val image = shopViewModel.state.value.shop!!.image
+            Icon(
                 painter = painterResource(id = R.drawable.navbar_message),
                 contentDescription = "Search icon",
                 modifier = Modifier
                     .size(40.dp)
                     .align(Alignment.TopStart)
                     .clickable {
-
+                        val user2Id = shopViewModel.state.value.shop!!.ownerId
+                        navController.navigate("${Screen.Chat.route}/$chatId/$user2Id/$image")
                     },
+                tint = MaterialTheme.colorScheme.tertiary
             )
         }
 

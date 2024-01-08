@@ -23,7 +23,7 @@ import javax.inject.Inject
 class NotificationViewModel @Inject constructor(
     val dataStoreManager: DataStoreManager,
     val repository: Repository
-) : ViewModel(){
+) : ViewModel() {
 
     private val _state = mutableStateOf(NotificationState())
     var state: State<NotificationState> = _state;
@@ -46,8 +46,7 @@ class NotificationViewModel @Inject constructor(
     private val _stateCurrentList = mutableStateOf(ListaTabovaState())
     var stateCurrentList: State<ListaTabovaState> = _stateCurrentList;
 
-    fun inicijalnoStanje()
-    {
+    fun inicijalnoStanje() {
         _stateUserRate.value = _stateUserRate.value.copy(
             isLoading = true,
             userRate = null,
@@ -83,10 +82,10 @@ class NotificationViewModel @Inject constructor(
         }
     }
 
-    fun rateProduct(id: Int, userId: Int, rating:Int, comment: String, notId: Int){
+    fun rateProduct(id: Int, userId: Int, rating: Int, comment: String, notId: Int) {
         viewModelScope.launch {
             try {
-                val review = LeaveReviewDTO(id, userId,rating, comment)
+                val review = LeaveReviewDTO(id, userId, rating, comment)
                 val response = repository.productReview(review)
 
                 if (response.isSuccessful) {
@@ -96,8 +95,7 @@ class NotificationViewModel @Inject constructor(
                         error = ""
                     )
                     deleteNotification(notId)
-                }
-                else{
+                } else {
                     _stateProductReview.value = _stateProductReview.value.copy(
                         isLoading = false,
                         productReview = null,
@@ -110,12 +108,19 @@ class NotificationViewModel @Inject constructor(
         }
     }
 
-    fun rateUser(raterId: Int, ratedId: Int,communication:Int, reliability:Int,overallExperience:Int, notId:Int ){
+    fun rateUser(
+        raterId: Int,
+        ratedId: Int,
+        communication: Int,
+        reliability: Int,
+        overallExperience: Int,
+        notId: Int
+    ) {
         viewModelScope.launch {
             try {
-                val rateUser = UserRateDTO(raterId,ratedId,communication,reliability,overallExperience)
+                val rateUser =
+                    UserRateDTO(raterId, ratedId, communication, reliability, overallExperience)
                 val response = repository.userRate(rateUser)
-
                 if (response.isSuccessful) {
                     _stateUserRate.value = _stateUserRate.value.copy(
                         isLoading = false,
@@ -123,8 +128,7 @@ class NotificationViewModel @Inject constructor(
                         error = ""
                     )
                     deleteNotification(notId)
-                }
-                else{
+                } else {
                     _stateUserRate.value = _stateUserRate.value.copy(
                         isLoading = false,
                         userRate = null,
@@ -137,7 +141,7 @@ class NotificationViewModel @Inject constructor(
         }
     }
 
-    fun getNotifications(userId: Int, type: List<Int>?, page: Int){
+    fun getNotifications(userId: Int, type: List<Int>?, page: Int) {
         _stateCurrentList.value = type?.let {
             stateCurrentList.value.copy(
                 lista = it
@@ -146,6 +150,8 @@ class NotificationViewModel @Inject constructor(
         viewModelScope.launch {
             try {
                 val response = repository.getNotifications(userId, type, page)
+                Log.d("TEST", userId.toString() + "" + type.toString() + "" + page.toString())
+                Log.d("TEST", response.toString())
                 if (response != null) {
                     if (response.isSuccessful) {
                         _state.value = response.body()?.let {
@@ -163,7 +169,8 @@ class NotificationViewModel @Inject constructor(
             }
         }
     }
-    fun deleteNotification(id: Int){
+
+    fun deleteNotification(id: Int) {
         viewModelScope.launch {
             try {
                 repository.deleteNotification(id)
@@ -172,7 +179,8 @@ class NotificationViewModel @Inject constructor(
             }
         }
     }
-    fun getNotificationPages(userId: Int,type: List<Int>?){
+
+    fun getNotificationPages(userId: Int, type: List<Int>?) {
         viewModelScope.launch {
             try {
                 val response = repository.getNotificationPageCount(userId, type)
@@ -186,7 +194,8 @@ class NotificationViewModel @Inject constructor(
             }
         }
     }
-    fun ChangePage(userId: Int,page: Int){
+
+    fun ChangePage(userId: Int, page: Int) {
         getNotifications(userId, _stateCurrentList.value.lista, page)
     }
 
@@ -201,8 +210,22 @@ class NotificationViewModel @Inject constructor(
         }
         return false
     }
-}
 
+    fun respondToPickupRequest(
+        orderId: Int,
+        resp: Int,
+        message: String
+    ) {
+        viewModelScope.launch {
+            try {
+                val response = repository.respondToPickupRequest(orderId, resp, message)
+
+            } catch (e: Exception) {
+                Log.d("NotificationViewModel", e.message.toString())
+            }
+        }
+    }
+}
 data class NotificationState (
     var isLoading : Boolean = true,
     var notifications : List<NotificationDTO> = listOf(),

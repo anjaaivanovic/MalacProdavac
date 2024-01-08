@@ -40,9 +40,6 @@ class DataStoreManager @Inject constructor(@ApplicationContext context: Context)
         preferences[FCM_KEY]
     }
 
-    val JWT_SECRET = "10e13609875c047a26c74fcba54bde5b"
-
-
     suspend fun getUserIdFromToken(): Int? {
         val token = this.tokenFlow.first()
 

@@ -9,6 +9,7 @@ import com.example.front.helper.DataStore.DataStoreManager
 import com.example.front.model.DTO.CheckAvailabilityReqDTO
 import com.example.front.model.DTO.CheckAvailabilityResDTO
 import com.example.front.model.DTO.ImageDataDTO
+import com.example.front.model.DTO.SubscribeDTO
 import com.example.front.model.product.ProductInCart
 import com.example.front.repository.MongoRepository
 import com.example.front.repository.Repository
@@ -185,4 +186,13 @@ class ProductViewModel @Inject constructor(
         this.state.value.product!!.liked = isToggled
     }
 
+    fun subscribeNotification (productId: Int, userId: Int) {
+        viewModelScope.launch {
+            try {
+                val response = repository.subscribeNotification(SubscribeDTO(productId, userId))
+            } catch (e: Exception) {
+                Log.d("Error", e.message.toString())
+            }
+        }
+    }
 }

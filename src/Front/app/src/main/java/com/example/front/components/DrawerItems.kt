@@ -15,7 +15,7 @@ val DrawerItems = listOf(
     DrawerItem(icon = R.drawable.navbar_cart2, label = "My cart", route = "ordering", secondaryLabel = "",roleId=1),
     DrawerItem(icon = R.drawable.navbar_cart1, label = "My orders", route = Screen.Orders.route, secondaryLabel = "",roleId=1),
     DrawerItem(icon = R.drawable.navbar_bell, label = "Notifications", route = Screen.Notification.route, secondaryLabel = "",roleId=1),
-//    DrawerItem(icon = R.drawable.navbar_message, label = "Messages", route = Screen.Home.route, secondaryLabel = "",roleId=1),
+    DrawerItem(icon = R.drawable.navbar_message, label = "Messages", route = Screen.Chats.route, secondaryLabel = "",roleId=1),
 )
 var filteredItems = emptyList<DrawerItem>()
 

@@ -25,6 +25,7 @@ import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.FractionalThreshold
 import androidx.compose.material.rememberSwipeableState
 import androidx.compose.material.swipeable
+import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -244,24 +245,26 @@ fun TypeOfNotifications(viewModel: NotificationViewModel, userId: Int) {
         NotificationCategory(listOf(), "All"),
         NotificationCategory(listOf(0, 2, 3), "Info"),
         NotificationCategory(listOf(1, 7, 8), "Reviews"),
-        NotificationCategory(listOf(5, 6), "Deals/Deliveries/Orders"),
+        NotificationCategory(listOf(5, 6, 9), "Deals/Deliveries/Orders"),
     )
 
     LazyRow {
         items(items) { item ->
-            ItemType(item.ids, item.text, viewModel, userId)
+            ItemType(item.ids, item.text, viewModel, userId, viewModel.state.value.isLoading)
         }
     }
 }
 
 @Composable
-fun ItemType(listOfIds: List<Int>, text: String, viewModel: NotificationViewModel, userId: Int) {
+fun ItemType(listOfIds: List<Int>, text: String, viewModel: NotificationViewModel, userId: Int, isLoading: Boolean) {
     Card(
         shape = RoundedCornerShape(10.dp),
         modifier = Modifier
             .padding(8.dp)
-            .clickable {
-                viewModel.getNotifications(userId, listOfIds, 1)
+            .clickable(enabled = !isLoading) {
+                if (!isLoading) {
+                    viewModel.getNotifications(userId, listOfIds, 1)
+                }
             }
     ) {
         Column(
@@ -269,16 +272,21 @@ fun ItemType(listOfIds: List<Int>, text: String, viewModel: NotificationViewMode
             horizontalAlignment = Alignment.CenterHorizontally
         )
         {
-            Text(text = text, modifier = Modifier.padding(16.dp, bottom=0.dp))
-            if(listOfIds == viewModel.stateCurrentList.value.lista)
+            Text(text = text, modifier = Modifier.padding(16.dp, bottom = 0.dp))
+            if (isLoading) {
+                CircularProgressIndicator(modifier = Modifier.padding(16.dp))
+            }
+            else
             {
-                Image(
-                    painterResource(id = R.drawable.crtica),
-                    contentDescription = null,
-                    modifier = Modifier
-                        .size(40.dp)
-                        .padding(16.dp, top = 0.dp)
-                )
+                if (listOfIds == viewModel.stateCurrentList.value.lista) {
+                    Image(
+                        painterResource(id = R.drawable.crtica),
+                        contentDescription = null,
+                        modifier = Modifier
+                            .size(40.dp)
+                            .padding(16.dp, top = 0.dp)
+                    )
+                }
             }
         }
     }
@@ -325,7 +333,11 @@ fun NotificationCard(
             Column(
                 modifier = Modifier
                     .padding(16.dp)
-                    .background(color = if(isRead || read.value) MaterialTheme.colorScheme.surface else Color(0xFFF4E5E0))
+                    .background(
+                        color = if (isRead || read.value) MaterialTheme.colorScheme.surface else Color(
+                            0xFFF4E5E0
+                        )
+                    )
             ) {
                 Row(
                     modifier = Modifier
@@ -482,6 +494,30 @@ fun RateUserDialog(
                                 .padding(10.dp),
                             style = MaterialTheme.typography.titleSmall.copy(color = MaterialTheme.colorScheme.onBackground)
                         )
+                        if (type == 9) {
+                            Column {
+                                Button(
+                                    onClick = {
+                                        viewModel.respondToPickupRequest(refId, 1, "Accepted")
+                                    },
+                                    modifier = Modifier.fillMaxWidth()
+                                ) {
+                                    Text("Accept")
+                                }
+
+                                Spacer(Modifier.height(8.dp))
+
+                                Button(
+                                    onClick = {
+                                        viewModel.respondToPickupRequest(refId, 1, "Not accepted")
+                                    },
+                                    modifier = Modifier.fillMaxWidth()
+                                ) {
+                                    Text("Decline")
+                                }
+                            }
+                        }
+
                         // -- USER RATE --
                         if (type == 1) {
                             Text(
@@ -527,41 +563,43 @@ fun RateUserDialog(
                                 )
                             }
                         }
-                        CardButton(
-                            text = "Rate",
-                            onClick = {
-                                if (type == 1) {
-                                    viewModel.rateUser(
-                                        userId,
-                                        refId,
-                                        selectedRatingC,
-                                        selectedRatingR,
-                                        selectedRatingO,
-                                        notId
-                                    )
-                                } else if (type == 7) {
-                                    viewModel.rateProduct(
-                                        refId,
-                                        userId,
-                                        selectedRatingC,
-                                        comment,
-                                        notId
-                                    )
-                                } else if (type == 8) {
-                                    viewModel.leaveShopReview(
-                                        refId,
-                                        userId,
-                                        selectedRatingC,
-                                        comment,
-                                        notId
-                                    )
-                                }
-                                onDismiss()
-                            },
-                            width = 1f,
-                            modifier = Modifier.height(50.dp),
-                            color = MaterialTheme.colorScheme.primary
-                        )
+                        if (type != 9) {
+                            CardButton(
+                                text = "Rate",
+                                onClick = {
+                                    if (type == 1) {
+                                        viewModel.rateUser(
+                                            userId,
+                                            refId,
+                                            selectedRatingC,
+                                            selectedRatingR,
+                                            selectedRatingO,
+                                            notId
+                                        )
+                                    } else if (type == 7) {
+                                        viewModel.rateProduct(
+                                            refId,
+                                            userId,
+                                            selectedRatingC,
+                                            comment,
+                                            notId
+                                        )
+                                    } else if (type == 8) {
+                                        viewModel.leaveShopReview(
+                                            refId,
+                                            userId,
+                                            selectedRatingC,
+                                            comment,
+                                            notId
+                                        )
+                                    }
+                                    onDismiss()
+                                },
+                                width = 1f,
+                                modifier = Modifier.height(50.dp),
+                                color = MaterialTheme.colorScheme.primary
+                            )
+                        }
                     }
                 }
             }
@@ -633,6 +671,15 @@ fun ViewDialog(
                         {
                             Text(
                                 text = "Rate",
+                                modifier = Modifier
+                                    .padding(10.dp)
+                                    .clickable { showRateUserDialog = true },
+                                style = MaterialTheme.typography.bodyLarge.copy(color = MaterialTheme.colorScheme.secondary)
+                            )
+                        }
+                        if(type == 9){
+                            Text(
+                                text = "View",
                                 modifier = Modifier
                                     .padding(10.dp)
                                     .clickable { showRateUserDialog = true },

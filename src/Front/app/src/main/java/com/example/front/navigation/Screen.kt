@@ -26,5 +26,7 @@ sealed class Screen(val route:String){
     object Delivery: Screen(route="delivery")
     object Route: Screen(route="route")
     object Chat: Screen(route="chat")
+    object Chats: Screen(route="chats")
     object RequestsForShop: Screen(route="requests_for_shop")
+
 }

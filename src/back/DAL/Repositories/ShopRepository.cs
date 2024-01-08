@@ -158,6 +158,7 @@ namespace back.DAL.Repositories
                             .Any(x => x.p.ShopId == shopId  && x.order.o.UserId == userId),
                 Rated = _context.ShopReviews.Any(x => x.ShopId == shopId && x.ReviewerId == userId),
                 IsOwner = shop.OwnerId == userId,
+                OwnerId = shop.OwnerId,
                 Categories = categories,
                 Subcategories = subcategories,
                 WorkingHours = workingHours,

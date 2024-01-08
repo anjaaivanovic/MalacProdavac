@@ -15,6 +15,7 @@ import com.example.front.MainActivity
 import com.example.front.R
 import com.example.front.helper.DataStore.DataStoreManager
 import com.example.front.repository.Repository
+import com.google.firebase.messaging.FirebaseMessaging
 import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
 import dagger.hilt.android.AndroidEntryPoint

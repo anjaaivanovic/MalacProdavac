@@ -12,6 +12,7 @@ import com.example.front.screens.RequestsForShopScreen.RequestsForShopScreen
 import com.example.front.screens.cart.NewCreditCartScreen
 import com.example.front.screens.categories.RegistrationCategories
 import com.example.front.screens.chat.ChatPage
+import com.example.front.screens.chat.ChatSessionsList
 import com.example.front.screens.delivery.DeliveryScreen
 import com.example.front.screens.delivery.RouteDetailsScreen
 import com.example.front.screens.home.HomePage
@@ -51,7 +52,6 @@ import com.example.front.viewmodels.splasintro.SplashAndIntroViewModel
 fun SetupNavGraph(
     navController: NavHostController
 ) {
-
     val loginViewModel: LoginViewModel = hiltViewModel()
     val homeViewModel: HomeViewModel = hiltViewModel()
     val categoriesViewModel: CategoriesViewModel = hiltViewModel()
@@ -76,7 +76,6 @@ fun SetupNavGraph(
     NavHost(
         navController = navController,
         startDestination = "intro"
-        //startDestination = "delivery"
     ) {
         composable(
             route = Screen.Home.route
@@ -177,8 +176,26 @@ fun SetupNavGraph(
             val id = arguments.getInt("id")
             SetUpShopScreen(navController = navController, myShopViewModel, id)
         }
-        composable(route = Screen.Chat.route) {
-            ChatPage(chatViewModel)
+        composable(
+            route = "chat/{chatId}/{user2Id}/{image}",
+            arguments = listOf(
+                navArgument("chatId") { type = NavType.StringType },
+                navArgument("user2Id") { type = NavType.IntType },
+                navArgument("image") { type = NavType.StringType }
+            )
+        ) { navBackStackEntry ->
+            val arguments = requireNotNull(navBackStackEntry.arguments)
+            val chatId = arguments.getString("chatId")
+            val user2Id = arguments.getInt("user2Id")
+            val image = arguments.getString("image")
+
+            ChatPage(chatViewModel, chatId!!, user2Id, myProfileViewModel, image!!, navController)
+        }
+
+        composable(
+            route = Screen.Chats.route
+        ) {
+            ChatSessionsList(chatViewModel, navController)
         }
         composable(route = Screen.Orders.route)
         {

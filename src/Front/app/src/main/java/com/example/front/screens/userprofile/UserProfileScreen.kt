@@ -630,7 +630,10 @@ fun EditDialog(onDismiss: () -> Unit,myProfileViewModel: MyProfileViewModel) {
     val overlayColor = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.4f)
 
     var username by remember { mutableStateOf(state!!.username) }
-    var address by remember { mutableStateOf(state!!.address) }
+    var address by remember { mutableStateOf("") }
+    if(state?.address == null)
+        state?.address = ""
+    address = state!!.address
     var name by remember { mutableStateOf(state!!.name) }
 
     var checkbox1State by remember { mutableStateOf(state?.roleId == 2) }

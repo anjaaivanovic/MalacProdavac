@@ -10,7 +10,7 @@ data class MyProfileDTO (
     @SerializedName("role") val role: String,
     @SerializedName("roleId") val roleId: Int,
     @SerializedName("username") val username: String,
-    @SerializedName("address") val address: String,
+    @SerializedName("address") var address: String,
     @SerializedName("email") val email: String,
     @SerializedName("rating") val rating: RatingDTO,
     @SerializedName("createdOn") val createdOn: String,

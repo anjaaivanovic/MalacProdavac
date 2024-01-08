@@ -101,7 +101,6 @@ fun ProductPage(
     val coroutineScope = rememberCoroutineScope()
     var selectedSize by remember { mutableStateOf<String?>(null) }
     var selectedSizeId by remember { mutableStateOf<Int?>(null) }
-    val context = LocalContext.current
     var isToggled by remember { mutableStateOf (false) }
     var leaveAReview by remember { mutableStateOf(false) }
     var comment by remember {
@@ -114,7 +113,9 @@ fun ProductPage(
 
     var currentPage = 1
 
-    var selectedImage by remember { mutableStateOf<ImageDataDTO>(ImageDataDTO(-1,"placeholder.png")) }
+    var flag = 1
+
+    var selectedImage by remember { mutableStateOf(ImageDataDTO(-1,"placeholder.png")) }
 
     var userId by remember {mutableStateOf(0)}
     LaunchedEffect(Unit) {
@@ -125,6 +126,7 @@ fun ProductPage(
     DisposableEffect(productID) {
         onDispose {
             productViewModel.resetReviewState()
+            flag = 1
         }
     }
 
@@ -147,10 +149,9 @@ fun ProductPage(
                     CircularProgressIndicator()
                 }
             } else {
-                var x = productViewModel.state.value.product!!.liked==true
                 val productInfo = productViewModel.state.value.product
 
-                if (productInfo?.images?.size != 0 && selectedImage.image == "placeholder.png") {
+                if (productInfo?.images?.size != 0 && flag == 1) {
                     selectedImage = productInfo?.images?.get(0)!!
                 }
 
@@ -249,6 +250,7 @@ fun ProductPage(
                                         modifier = Modifier
                                             .clickable {
                                                 selectedImage = image
+                                                flag+=1
                                             }
                                             .border(2.dp, if (image == selectedImage) MaterialTheme.colorScheme.primary else Color.Transparent, shape = RoundedCornerShape(10.dp))
                                             .clip(RoundedCornerShape(10.dp))
@@ -456,94 +458,115 @@ fun ProductPage(
                                     modifier = Modifier.weight(1f)
                                 )
                         }
-
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.Center
-                        ) {
-                            Button(
-                                onClick = {
-                                    if (productInfo?.name != null &&
-                                        productInfo?.price != null &&
-                                        productInfo.shopId != null &&
-                                        productInfo?.shopName != null &&
-                                        productInfo.images?.isNotEmpty() == true &&
-                                        productInfo.metric != null &&
-                                        (
-                                                productInfo.sizes?.isEmpty() == true ||
-                                                        (productInfo.sizes != null && productInfo.sizes[0].size == "None") ||
-                                                        (selectedSize != null && selectedSizeId != null)
-                                                )
-                                    ) {
-                                        ////proverava da li je na stanju
-                                        coroutineScope.launch {
-                                            val result: CheckAvailabilityResDTO? = productViewModel.isAvailable(productInfo.productId!!, selectedSize ?: "None", quantity)
-                                            if(result != null && result.available >= result.quantity){
-                                                productViewModel.addToCart(
-                                                    productID,
-                                                    productInfo.name,
-                                                    productInfo.price,
-                                                    quantity,
-                                                    productInfo.shopId,
-                                                    productInfo.shopName,
-                                                    productInfo.images[0].image,
-                                                    productInfo.metric,
-                                                    selectedSize ?: "None",
-                                                    selectedSizeId ?: 0
-                                                )
-
-                                                coroutineScope.launch {
-                                                    try {
-                                                        toastHostState.showToast(
-                                                            "Product added to cart",
-                                                            Icons.Default.Check
-                                                        )
-                                                    } catch (e: Exception) {
-                                                        Log.e("ToastError", "Error showing toast", e)
-                                                    }
-                                                }
-                                            } else if (result != null){
-                                                coroutineScope.launch {
-                                                    try {
-                                                        quantity = if (result.available > 0) result.available else 1
-                                                        toastHostState.showToast(
-                                                            "Currently available: ${result.available}",
-                                                            Icons.Default.Clear
-                                                        )
-                                                    } catch (e: Exception) {
-                                                        Log.e("ToastError", "Error showing toast", e)
-                                                    }
-                                                }
-                                            }
-                                        }
-
-                                    } else if (productInfo?.sizes?.isNotEmpty() == true || selectedSize != null) {
-                                        coroutineScope.launch {
-                                            try {
-                                                toastHostState.showToast(
-                                                    "Please select size",
-                                                    Icons.Default.Clear
-                                                )
-                                            } catch (e: Exception) {
-                                                Log.e("ToastError", "Error showing toast", e)
-                                            }
-                                        }
-                                    }
-                                },
-                                modifier = Modifier
-                                    .height(90.dp)
-                                    .fillMaxWidth()
-                                    .padding(20.dp),
-                                shape = RoundedCornerShape(30),
-                                colors = ButtonDefaults.buttonColors(Color(0xFFE48359))
+                        if(productInfo?.sizes?.all { it.quantity == 0 } != true)
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.Center
                             ) {
-                                Text(
-                                    text = "Add To Cart",
-                                    style = MaterialTheme.typography.labelSmall.copy(color = MaterialTheme.colorScheme.background),
-                                    color = Color.White
-                                )
+                                Button(
+                                    onClick = {
+                                        if (productInfo?.name != null &&
+                                            productInfo?.price != null &&
+                                            productInfo.shopId != null &&
+                                            productInfo?.shopName != null &&
+                                            productInfo.images?.isNotEmpty() == true &&
+                                            productInfo.metric != null &&
+                                            (
+                                                    productInfo.sizes?.isEmpty() == true ||
+                                                            (productInfo.sizes != null && productInfo.sizes[0].size == "None") ||
+                                                            (selectedSize != null && selectedSizeId != null)
+                                                    )
+                                        ) {
+                                            ////proverava da li je na stanju
+                                            coroutineScope.launch {
+                                                val result: CheckAvailabilityResDTO? = productViewModel.isAvailable(productInfo.productId!!, selectedSize ?: "None", quantity)
+                                                if(result != null && result.available >= result.quantity){
+                                                    productViewModel.addToCart(
+                                                        productID,
+                                                        productInfo.name,
+                                                        productInfo.price,
+                                                        quantity,
+                                                        productInfo.shopId,
+                                                        productInfo.shopName,
+                                                        productInfo.images[0].image,
+                                                        productInfo.metric,
+                                                        selectedSize ?: "None",
+                                                        selectedSizeId ?: 0
+                                                    )
+
+                                                    coroutineScope.launch {
+                                                        try {
+                                                            toastHostState.showToast(
+                                                                "Product added to cart",
+                                                                Icons.Default.Check
+                                                            )
+                                                        } catch (e: Exception) {
+                                                            Log.e("ToastError", "Error showing toast", e)
+                                                        }
+                                                    }
+                                                } else if (result != null){
+                                                    coroutineScope.launch {
+                                                        try {
+                                                            quantity = if (result.available > 0) result.available else 1
+                                                            toastHostState.showToast(
+                                                                "Currently available: ${result.available}",
+                                                                Icons.Default.Clear
+                                                            )
+                                                        } catch (e: Exception) {
+                                                            Log.e("ToastError", "Error showing toast", e)
+                                                        }
+                                                    }
+                                                }
+                                            }
+
+                                        } else if (productInfo?.sizes?.isNotEmpty() == true || selectedSize != null) {
+                                            coroutineScope.launch {
+                                                try {
+                                                    toastHostState.showToast(
+                                                        "Please select size",
+                                                        Icons.Default.Clear
+                                                    )
+                                                } catch (e: Exception) {
+                                                    Log.e("ToastError", "Error showing toast", e)
+                                                }
+                                            }
+                                        }
+                                    },
+                                    modifier = Modifier
+                                        .height(90.dp)
+                                        .fillMaxWidth()
+                                        .padding(20.dp),
+                                    shape = RoundedCornerShape(30),
+                                    colors = ButtonDefaults.buttonColors(Color(0xFFE48359))
+                                ) {
+                                    Text(
+                                        text = "Add To Cart",
+                                        style = MaterialTheme.typography.labelSmall.copy(color = MaterialTheme.colorScheme.background),
+                                        color = Color.White
+                                    )
+                                }
                             }
-                        }
+                        else
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.Center
+                            ) {
+                                Button(
+                                    onClick = { productViewModel.subscribeNotification(productID, userId) },
+                                    modifier = Modifier
+                                        .height(90.dp)
+                                        .fillMaxWidth()
+                                        .padding(20.dp),
+                                    shape = RoundedCornerShape(30),
+                                    colors = ButtonDefaults.buttonColors(Color(0xFFE48359))
+                                ) {
+                                    Text(
+                                        text = "Notify me when available",
+                                        style = MaterialTheme.typography.labelSmall.copy(color = MaterialTheme.colorScheme.background),
+                                        color = Color.White
+                                    )
+                                }
+                            }
                         Column(
                             modifier = Modifier.fillMaxWidth(),
                             horizontalAlignment = Alignment.CenterHorizontally
@@ -743,7 +766,7 @@ fun ProductPage(
                 }
         }
     if (showAddProduct) {
-        EditProduct(onDismiss = { showAddProduct = false }, oneShopViewModel, productViewModel.state.value.product!!)
+        EditProduct(onDismiss = { showAddProduct = false }, oneShopViewModel, productViewModel.state.value.product!!, navHostController)
     }
     ToastHost(hostState = toastHostState)
     }

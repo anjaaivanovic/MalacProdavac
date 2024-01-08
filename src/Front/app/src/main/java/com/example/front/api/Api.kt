@@ -32,6 +32,7 @@ import com.example.front.model.DTO.ShopDTO
 import com.example.front.model.DTO.ShopDetailsCheckoutDTO
 import com.example.front.model.DTO.ShopDetailsDTO
 import com.example.front.model.DTO.ShopPagesDTO
+import com.example.front.model.DTO.SubscribeDTO
 import com.example.front.model.DTO.ToggleLikeDTO
 import com.example.front.model.DTO.Trip
 import com.example.front.model.DTO.UserRateDTO
@@ -386,4 +387,15 @@ interface Api {
         @Body newRoute: NewRoute
     ): ApiResponse
 
+    @PUT("/back/Order/RespondToPickupRequest")
+    suspend fun respondToPickupRequest(
+        @Query("orderId") orderId: Int,
+        @Query("resp") resp: Int,
+        @Query("message") message: String
+    ):Response<Boolean>
+
+    @POST("/back/Product/Subscribe")
+    suspend fun subscribeNotification(
+        @Body subscribeDTO: SubscribeDTO
+    ):Response<Boolean>
 }
